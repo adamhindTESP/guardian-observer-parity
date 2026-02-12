@@ -1,0 +1,72 @@
+[
+  {
+    "test_id": "gte-emerg-001",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "FORCE_LIMIT_EXCEEDED",
+    "eval_hash": "a8e0536f"
+  },
+  {
+    "test_id": "gte-emerg-002",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "VELOCITY_LIMIT_EXCEEDED",
+    "eval_hash": "77c69f3b"
+  },
+  {
+    "test_id": "gte-emerg-003",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "f74d2c3c"
+  },
+  {
+    "test_id": "gte-emerg-004",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "ac6484ba"
+  },
+  {
+    "test_id": "gte-emerg-005",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "FORCE_LIMIT_EXCEEDED",
+    "eval_hash": "0583b886"
+  },
+  {
+    "test_id": "gte-emerg-006",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "FORCE_LIMIT_EXCEEDED",
+    "eval_hash": "12028ca8"
+  },
+  {
+    "test_id": "gte-emerg-007",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "FORCE_LIMIT_EXCEEDED",
+    "eval_hash": "7cad25eb"
+  },
+  {
+    "test_id": "gte-emerg-008",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "3331998e"
+  },
+  {
+    "test_id": "gte-emerg-009",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "VETO",
+    "reason": "FORCE_LIMIT_EXCEEDED",
+    "eval_hash": "e3cf1b91"
+  },
+  {
+    "test_id": "gte-emerg-010",
+    "timestamp": "2026-02-12T19:19:40.626241",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "c989ac5d"
+  }
+]

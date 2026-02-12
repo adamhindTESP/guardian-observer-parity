@@ -1,0 +1,72 @@
+[
+  {
+    "test_id": "gte-temple-001",
+    "timestamp": "2026-02-12T19:23:09.181505",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "49015bf0"
+  },
+  {
+    "test_id": "gte-temple-002",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "4dcf04a7"
+  },
+  {
+    "test_id": "gte-temple-003",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "e968266f"
+  },
+  {
+    "test_id": "gte-temple-004",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "4f774c1a"
+  },
+  {
+    "test_id": "gte-temple-005",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "a39aaea3"
+  },
+  {
+    "test_id": "gte-temple-006",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "2858b072"
+  },
+  {
+    "test_id": "gte-temple-007",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "c1259d11"
+  },
+  {
+    "test_id": "gte-temple-008",
+    "timestamp": "2026-02-12T19:23:09.182504",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "3a72a3f8"
+  },
+  {
+    "test_id": "gte-temple-009",
+    "timestamp": "2026-02-12T19:23:09.183502",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "9178a3be"
+  },
+  {
+    "test_id": "gte-temple-010",
+    "timestamp": "2026-02-12T19:23:09.183502",
+    "verdict": "PASS",
+    "reason": "",
+    "eval_hash": "b2113f28"
+  }
+]
