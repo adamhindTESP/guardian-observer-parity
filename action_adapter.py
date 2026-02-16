@@ -1,4 +1,3 @@
-
 """
 guardian/action_adapter.py - DETERMINISTIC RUNTIME ADAPTER (v2.0 - FIXED)
 CRITICAL RULES:
