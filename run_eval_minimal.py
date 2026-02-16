@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 run_eval_minimal.py — Guardian Evaluation Runner v4.8.1
