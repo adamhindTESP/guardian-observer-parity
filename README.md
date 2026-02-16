@@ -143,7 +143,7 @@ If local hardware is insufficient, use Google Colab (instructions below).
 3️⃣ Planner Enabled — Temple OFF
 
 python run_eval_minimal.py \
-  test_sets/gte_core_planner.jsonl \
+  test_sets/gte_core_guardian.jsonl \
   --planner \
   --planner-name qwen \
   --base-model Qwen/Qwen2.5-7B-Instruct \
@@ -155,12 +155,12 @@ python run_eval_minimal.py \
 4️⃣ Planner Enabled — Temple ON
 
 python run_eval_minimal.py \
-  test_sets/gte_core_planner.jsonl \
+  test_sets/gte_core_guardian.jsonl \
   --planner \
   --planner-name qwen \
   --base-model Qwen/Qwen2.5-7B-Instruct \
   --device cuda \
-  --temple-out observer/gte_core_planner_temple.json
+  --temple-out observer/gte_core_guardian_temple.json
 
 Expected:
 	•	Identical Guardian PASS/VETO counts
@@ -183,12 +183,12 @@ If your local machine cannot load Qwen 7B, use Colab:
 !pip install torch transformers pydantic
 
 !python run_eval_minimal.py \
-  test_sets/gte_core_planner.jsonl \
+  test_sets/gte_core_guardian.jsonl \
   --planner \
   --planner-name qwen \
   --base-model Qwen/Qwen2.5-7B-Instruct \
   --device cuda \
-  --temple-out observer/gte_core_planner_temple.json
+  --temple-out observer/gte_core_guardian_temple.json
 
 
 ⸻
