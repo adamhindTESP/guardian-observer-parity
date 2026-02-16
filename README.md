@@ -3,7 +3,7 @@ Guardian–Observer Parity
 Deterministic Evaluation Artifact — Paper 2
 
 Repository: guardian-observer-parity
-Status: Deterministic evaluation harness (frozen for publication)
+Status: Frozen deterministic evaluation harness (publication artifact)
 Purpose: Empirical validation of the Observer–Guardian Non-Interference Invariant
 
 ⸻
@@ -20,7 +20,7 @@ Temple is strictly:
 	•	Invisible to Planner and Guardian
 	•	Non-branching with respect to runtime control flow
 
-If Temple ON and Temple OFF produce identical evaluation streams, then non-interference is empirically demonstrated.
+If Temple ON and Temple OFF produce identical evaluation streams, non-interference is empirically demonstrated.
 
 ⸻
 
@@ -43,10 +43,10 @@ This repository is:
 ⸻
 
 🚫 What This Repository Is Not
-	•	❌ Not a training repository
-	•	❌ Not a development sandbox
-	•	❌ Not a robotics stack
-	•	❌ Not a deployment safety system
+	•	Not a training repository
+	•	Not a development sandbox
+	•	Not a robotics stack
+	•	Not a deployment safety system
 
 This repository exists solely to verify the Observer–Guardian non-interference invariant.
 
@@ -73,7 +73,7 @@ Critical invariant:
 
 Reproducibility Modes
 
-This repository supports two reproduction paths.
+Two reproduction paths are supported.
 
 ⸻
 
@@ -85,9 +85,11 @@ This is sufficient to validate the non-interference invariant.
 	•	Runs on any standard laptop
 	•	Fully validates hash parity
 
+⸻
+
 1️⃣ Temple OFF
 
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --guardian-only
+python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --guardian-only
 
 Expected output:
 	•	Deterministic PASS/VETO counts
@@ -98,7 +100,9 @@ Expected output:
 
 2️⃣ Temple ON
 
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --guardian-only --temple-out observer/gte_core_guardian_temple.json
+python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
+    --guardian-only \
+    --temple-out observer/gte_core_guardian_temple.json
 
 Expected:
 	•	Identical PASS/VETO counts
@@ -117,6 +121,7 @@ The invariant must still hold:
 	•	Guardian decisions identical
 	•	Evaluation stream hash identical
 	•	Planner call count unchanged
+	•	Planner proposal hashes identical
 
 ⸻
 
@@ -126,57 +131,73 @@ Experiments use:
 
 Qwen/Qwen2.5-7B-Instruct
 
-This model requires:
+Requirements:
 	•	~16GB RAM minimum
 	•	GPU strongly recommended
 	•	CUDA recommended
-
-If local hardware is insufficient, use Google Colab (instructions below).
 
 ⸻
 
 3️⃣ Planner Enabled — Temple OFF
 
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --planner --planner-name qwen --base-model Qwen/Qwen2.5-7B-Instruct --device cuda --out-dir results_planner_off --run-id qwen_core_guardian_temple_off
+python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
+    --planner \
+    --planner-name qwen \
+    --base-model Qwen/Qwen2.5-7B-Instruct \
+    --device cuda \
+    --out-dir results_planner_off \
+    --run-id qwen_core_guardian_temple_off
 
 
 ⸻
 
 4️⃣ Planner Enabled — Temple ON
 
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --planner --planner-name qwen --base-model Qwen/Qwen2.5-7B-Instruct --device cuda --temple-out observer/qwen_core_guardian_temple_on.json --out-dir results_planner_on --run-id qwen_core_guardian_temple_on
+python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
+    --planner \
+    --planner-name qwen \
+    --base-model Qwen/Qwen2.5-7B-Instruct \
+    --device cuda \
+    --temple-out observer/qwen_core_guardian_temple_on.json \
+    --out-dir results_planner_on \
+    --run-id qwen_core_guardian_temple_on
 
 Expected:
 	•	Identical Guardian PASS/VETO counts
-	•	Identical evaluation stream hash
 	•	Identical planner call count
+	•	Identical planner proposal hashes
+	•	Identical SHA-256 evaluation stream hash
 
-Hash parity ON/OFF is the proof.
+Hash parity ON/OFF is the invariant proof.
 
 ⸻
 
-Google Colab Reproduction (Recommended for Planner Runs)
+Google Colab Reproduction (Planner Runs)
 
-If your local machine cannot load Qwen 7B, use Colab:
+If local hardware cannot load Qwen 7B:
 	1.	Set runtime to GPU
 	2.	Run:
 
-!git clone https://github.com/adamhindTESP/guardian-observer-parity.git
-%cd guardian-observer-parity
+git clone https://github.com/adamhindTESP/guardian-observer-parity.git
+cd guardian-observer-parity
 
-!pip install torch transformers pydantic
+pip install torch transformers pydantic
 
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --planner --planner-name qwen --base-model Qwen/Qwen2.5-7B-Instruct --device cuda --out-dir results_planner_off --run-id qwen_core_guardian_temple_off
+python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
+    --planner \
+    --planner-name qwen \
+    --base-model Qwen/Qwen2.5-7B-Instruct \
+    --device cuda \
+    --out-dir results_planner_off \
+    --run-id qwen_core_guardian_temple_off
 
-or 
-
-!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --planner --planner-name qwen --base-model Qwen/Qwen2.5-7B-Instruct --device cuda --temple-out observer/qwen_core_guardian_temple_on.json --out-dir results_planner_on --run-id qwen_core_guardian_temple_on
+Repeat with --temple-out for Temple ON.
 
 ⸻
 
 Lightweight Planner Option (Optional)
 
-For low-memory systems, a smaller Qwen variant may be used:
+For lower-memory systems:
 
 Qwen/Qwen2.5-1.5B-Instruct
 
@@ -194,7 +215,7 @@ The evaluation runner computes a cumulative SHA-256 hash of:
 
 Temple writes artifacts only after decisions finalize.
 
-The hash does not include observer output.
+The evaluation hash does not include observer output.
 
 Hash parity ON/OFF is the invariant proof.
 
@@ -214,7 +235,7 @@ Hash H must match exactly.
 
 Threat Model (Paper 2 Scope)
 
-This repository tests only:
+This repository tests:
 	•	Runtime non-interference
 	•	Authority separation integrity
 	•	Write-only observer behavior
@@ -237,7 +258,7 @@ Safety enforcement is independent of planner learning.
 
 Paper 2 demonstrates:
 
-Observer layer cannot influence enforcement decisions.
+Observation layer cannot influence enforcement decisions.
 
 Together:
 	•	Intelligence ≠ Authority
@@ -261,22 +282,19 @@ If any of these are modified, the parity proof is invalid.
 
 Versioning
 
-Once parity validation is complete, this repository will be tagged:
+Publication tag:
 
 observer-parity-v1.0.0
 
-The tag represents a frozen experimental state used in Paper 2.
+Represents the frozen experimental state used in Paper 2.
 
 ⸻
 
 License
 
 MIT License
-
 Copyright (c) 2026
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the “Software”), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, subject to the conditions stated in the LICENSE file.
+in the Software without restriction, subject to the conditions stated in the LICENSE file.
