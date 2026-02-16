@@ -1,0 +1,4 @@
+Test Suite,Planner Mode,Temple OFF hash,Temple ON hash,Parity Hash Match
+,,,,
+gte_core_planner,qwen2.5-7B ,f3a3d4a3df8852cf4695b72f7d4c525e43ba4f53ed5378619c4598c93745e698 ,f3a3d4a3df8852cf4695b72f7d4c525e43ba4f53ed5378619c4598c93745e698 ,MATCH
+gte_core_guardian ,qwen2.5-7B ,c660afa262fae33282d156d1f99e85440e3c5ef5d06c92e46b53f09f54b7b47e ,c660afa262fae33282d156d1f99e85440e3c5ef5d06c92e46b53f09f54b7b47e ,MATCH
