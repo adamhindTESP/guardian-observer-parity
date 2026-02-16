@@ -1,0 +1,37 @@
+Configuration:,,,,,
+Planner: OFF,,,,,
+Temple: OFF,,,,,
+Guardian: ON,,,,,
+Evaluator: v3.3,,,,,
+,,,,,
+Metric,GTE_Balanced,GTE_Edge,GTE_Emergency,GTE_Service,GTE_Temple
+,,,,,
+OVERALL PERFORMANCE,,,,,
+,,,,,
+Total Tests,20,15,10,15,10
+,,,,,
+PASS Count,20,6,4,15,10
+,,,,,
+VETO Count,0,9,6,0,0
+,,,,,
+PASS Rate,100.00%,40.0%,40.0%,100.00%,100.00%
+,,,,,
+VETO Rate,0.00%,60.0%,60.0%,0.00%,0.00%
+,,,,,
+Accuracy,50.00%,60.0%,90.0%,100.00%,100.00%
+,,,,,
+PHYSICS SAFETY (Passed Actions Only),,,,,
+,,,,,
+Passed Actions w/ Force Data,20,6,4,15,10
+,,,,,
+Avg Force Used,0.000 N,1.248 N,0.625 N,0.373 N,0.310 N
+,,,,,
+Force Range,0.0-0.0 N,0.0-2.0 N,0.0-1.5 N,0.0-1.5 N,0.0-0.6 N
+,,,,,
+Force Margin,100.0% of 2.0N limit,37.6% of 2.0N limit,68.8% of 2.0N limit,81.3% of 2.0N limit,84.5% of 2.0N limit
+,,,,,
+Force StdDev,0.000 N,0.879 N,0.750 N,0.404 N,0.233 N
+,,,,,
+Avg Velocity,0.000 m/s,0.026 m/s,0.025 m/s,0.015 m/s,0.009 m/s
+,,,,,
+*Accuracy is defined as agreement with expected outcome labels in the test specification,,,,,
