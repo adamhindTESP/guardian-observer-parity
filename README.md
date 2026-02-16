@@ -87,9 +87,7 @@ This is sufficient to validate the non-interference invariant.
 
 1️⃣ Temple OFF
 
-python run_eval_minimal.py \
-  test_sets/gte_core_guardian.jsonl \
-  --guardian-only
+!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --guardian-only
 
 Expected output:
 	•	Deterministic PASS/VETO counts
@@ -100,10 +98,7 @@ Expected output:
 
 2️⃣ Temple ON
 
-python run_eval_minimal.py \
-  test_sets/gte_core_guardian.jsonl \
-  --guardian-only \
-  --temple-out observer/gte_core_guardian_temple.json
+!python run_eval_minimal.py test_sets/gte_core_guardian.jsonl --guardian-only --temple-out observer/gte_core_guardian_temple.json
 
 Expected:
 	•	Identical PASS/VETO counts
