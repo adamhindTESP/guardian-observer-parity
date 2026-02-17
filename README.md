@@ -173,26 +173,27 @@ Computed from:
 
 ***
 
-## 📊 Example Output
-```text
+## 📊 Example Output (Planner + Guardian Enforcement)
+
+```
 EVAL SUMMARY
 ---------------------------------------------------
-Total tests        : 8
-PASS               : 8
-VETO               : 0
-Planner calls      : 0
+Total tests        : 7
+PASS               : 6
+VETO               : 1
+Planner calls      : 7
 ---------------------------------------------------
-Avg force (N)      : 0.0000
-Avg velocity (m/s) : 0.0000
-Avg distance (m)   : 0.3000
+Avg force (N)      : 1.6857
+Avg velocity (m/s) : 0.0543
+Avg distance (m)   : 0.2929
 ===================================================
 DETERMINISTIC MODE (Seed Locked)
 Seed               : 42
-Stream Hash        : 022b32bb7bbb1ad6f4369f83682054a5797c10b7fdb6fb5f82c8ebd24e06fc1
+Stream Hash        : 483647c61a124ad85f0c625a43d41ad39366596e2cf9789829ab47c9dcfc3bac
 ===================================================
 ```
 
-Temple ON and OFF must produce **identical** stream hash values.
+**Temple ON and OFF produce identical stream hash values.** This shows active Guardian vetoes (1/7) under live planner proposals.
 
 ***
 
@@ -238,6 +239,7 @@ Temple ON and OFF must produce **identical** stream hash values.
 - Robust planner JSON extraction  
 - Seed-locked deterministic generation  
 - Guardian-only & Planner+Guardian parity (same enforcement dataset)  
+- Realistic enforcement example (1 VETO demonstrated)  
 - Clarified determinism scope  
 
 **Previous:** v1.0.0 (initial), v1.1.0 (determinism added)
