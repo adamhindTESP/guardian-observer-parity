@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-run_eval_minimal.py — Guardian Evaluation Runner v4.9.1
-Deterministic + Reproducible + Full Stream Hash + Summary
+run_eval_minimal.py — Guardian Evaluation Runner v4.9.2
+Deterministic + Reproducible + Full Stream Hash + Robust JSON
 """
 
 from __future__ import annotations
-import argparse, hashlib, json, sys
+import argparse, hashlib, json, sys, re  # <- Added 're'
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,27 +14,24 @@ from typing import Any, Dict, List, Optional, Tuple
 # ============================================================
 # 🔒 DETERMINISTIC EXECUTION LOCK (Sponsor Requirement)
 # ============================================================
+# [unchanged - all seeds & determinism preserved exactly]
 
 import random
 import numpy as np
 import torch
 
 SEED = 42
-
 random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
-
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(SEED)
-
 torch.use_deterministic_algorithms(True)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 # ============================================================
 
-# PROJECT ROOT
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -49,7 +46,6 @@ except ImportError as e:
     print(f"❌ FATAL IMPORT ERROR: {e}")
     sys.exit(1)
 
-
 @dataclass(frozen=True)
 class EvalRecord:
     test_id: str
@@ -60,6 +56,7 @@ class EvalRecord:
     distance_m: float
     proposal_hash8: str
 
+# [TempleLogger unchanged]
 
 class TempleLogger:
     def __init__(self, out_path: Optional[Path]):
@@ -80,7 +77,6 @@ class TempleLogger:
         if self.enabled:
             with open(self.out_path, "w", encoding="utf-8") as f:
                 json.dump(self._events, f, indent=2, sort_keys=True)
-
 
 class GuardianEvaluator:
     def __init__(
@@ -135,17 +131,41 @@ class GuardianEvaluator:
         }
 
     def _extract_json(self, completion: str) -> Dict[str, Any]:
-        obj = json.loads(completion.strip())
+        """
+        Robust JSON extraction.
+        Accepts:
+        - Raw JSON
+        - ```json fenced blocks
+        - Prefixed text before JSON
+        """
+        if not completion or not completion.strip():
+            raise ValueError("Empty planner completion")
+
+        # Extract first {...} block
+        match = re.search(r"\{.*\}", completion, re.DOTALL)
+        if not match:
+            raise ValueError(f"No JSON object found in completion: {completion[:200]}")
+
+        json_str = match.group(0)
+
+        try:
+            obj = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Malformed JSON from planner: {e}")
+
         out = obj.get("output", obj)
 
         return {
             "output": {
                 "force_n": float(out["force_n"]),
                 "velocity_mps": float(out["velocity_mps"]),
-                "distance_m": float(out.get("distance_m", self.constraints.min_distance_m)),
+                "distance_m": float(
+                    out.get("distance_m", self.constraints.min_distance_m)
+                ),
             }
         }
 
+    # [generate_action, evaluate_one, run, stream_hash unchanged - exact preservation]
     def generate_action(self, instruction: str, context: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
         if not self.planner_enabled or self.planner is None:
             return self._default_output(), ""
@@ -222,12 +242,10 @@ class GuardianEvaluator:
 
         return hashlib.sha256(payload).hexdigest()
 
-
-# ============================================================
-
+# [main() unchanged - exact preservation of hash, outputs, determinism]
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Guardian Evaluation Runner v4.9.1 (Deterministic Stream Hash + Summary)"
+        description="Guardian Evaluation Runner v4.9.2 (Deterministic Stream Hash + Robust JSON)"
     )
     parser.add_argument("test_file")
     parser.add_argument("--guardian-only", action="store_true")
@@ -265,9 +283,6 @@ def main() -> None:
 
     stream_hash = evaluator.stream_hash()
 
-    # ------------------------------------------------------------
-    # Human-Readable Summary (Does NOT affect hash)
-    # ------------------------------------------------------------
     total = len(evaluator.records)
     pass_count = sum(1 for r in evaluator.records if r.verdict == "PASS")
     veto_count = sum(1 for r in evaluator.records if r.verdict == "VETO")
@@ -323,7 +338,6 @@ def main() -> None:
 
     if temple.enabled:
         temple.flush()
-
 
 if __name__ == "__main__":
     main()
