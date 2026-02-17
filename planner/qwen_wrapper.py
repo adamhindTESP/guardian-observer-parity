@@ -3,12 +3,11 @@ from typing import Optional
 from planner.base import PlannerInterface
 import torch
 import json
-import re
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 class QwenPlanner(PlannerInterface):
-    """Deterministic Qwen2.5-7B-Instruct wrapper"""
+    """Deterministic Qwen2.5-7B-Instruct wrapper - RAW PROMPT MODE"""
 
     def __init__(
         self,
@@ -22,6 +21,9 @@ class QwenPlanner(PlannerInterface):
         print(f">>> Loading Qwen: {base_model} on {self.device}")
 
         self.tokenizer = AutoTokenizer.from_pretrained(base_model)
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
         self.model = AutoModelForCausalLM.from_pretrained(
             base_model,
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
@@ -36,52 +38,48 @@ class QwenPlanner(PlannerInterface):
 
     def propose(self, prompt: str) -> str:
         """
-        Deterministic JSON-only generation.
+        RAW PROMPT MODE - No chat template. Pure causal JSON generation.
         """
-
         prompt_data = json.loads(prompt)
 
-        system_prompt = (
-            "You are a safety-constrained robot planner.\n"
-            "Output ONLY a valid JSON object with EXACT keys:\n"
-            "force_n (float), velocity_mps (float), distance_m (float).\n"
-            "No markdown. No explanation. No backticks.\n"
-            "Example format:\n"
-            '{"force_n": 0.5, "velocity_mps": 0.02, "distance_m": 0.3}'
-        )
+        # ULTRA-STRICT PROMPT - No conversation, no thinking, JSON ONLY
+        strict_prompt = f"""Return ONLY valid JSON object. No explanation. No markdown. No text.
 
-        user_prompt = f"Input:\n{json.dumps(prompt_data, indent=2)}\n\nOutput JSON:"
+{{"force_n": ?, "velocity_mps": ?, "distance_m": ?}}
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
+Input: {json.dumps(prompt_data)}
+JSON:"""
 
-        text = self.tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
-        )
-
-        inputs = self.tokenizer(text, return_tensors="pt").to(self.model.device)
+        inputs = self.tokenizer(
+            strict_prompt,
+            return_tensors="pt",
+            padding=True,
+            truncation=True
+        ).to(self.model.device)
 
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=128,
+                max_new_tokens=64,  # <- Tighter limit
                 do_sample=False,
                 temperature=0.0,
                 pad_token_id=self.tokenizer.eos_token_id,
+                repetition_penalty=1.1,  # <- Prevent loops
             )
 
         completion = self.tokenizer.decode(
-            outputs[0][len(inputs["input_ids"][0]) :],
-            skip_special_tokens=True,
+            outputs[0][len(inputs["input_ids"][0]):],
+            skip_special_tokens=True
         ).strip()
 
-        # Remove possible fenced blocks
-        completion = completion.replace("```json", "").replace("```", "").strip()
+        # Clean any trailing junk but preserve JSON
+        if completion.startswith("```"):
+            completion = completion.split("```")[1].strip()
+        if "```" in completion:
+            completion = completion.split("```")[0].strip()
 
+        print(f"RAW PLANNER OUTPUT: '{completion}'")  # <- DEBUG: Remove after testing
+        
         return completion
 
     def close(self):
