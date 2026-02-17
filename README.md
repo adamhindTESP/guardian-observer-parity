@@ -274,7 +274,8 @@ Version
 
 Publication tag:
 
-observer-parity-v1.0.0
+observer-parity-v1.1.0
+This tag reflects the deterministic seeded artifact (SEED=42, PyTorch deterministic algorithms enabled) referenced in Paper 2.
 
 Represents the frozen state used in Paper 2.
 
