@@ -248,4 +248,4 @@ class GuardianEvaluator:
         ]
         
         # Build expected lookup
-        self.expected = {t["id"]: t["expected_outcome"] for t in tests if "
+        self.expected = {t["id"]: t["expected_outcome"] for t in tests if "expected_outcome" in t}
