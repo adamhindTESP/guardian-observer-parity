@@ -7,7 +7,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
 class QwenPlanner(PlannerInterface):
-    """Deterministic Qwen2.5-7B-Instruct wrapper - RAW PROMPT MODE"""
+    """Deterministic Qwen2.5-7B-Instruct wrapper - CHAT TEMPLATE + CLEAN JSON"""
 
     def __init__(
         self,
@@ -38,47 +38,53 @@ class QwenPlanner(PlannerInterface):
 
     def propose(self, prompt: str) -> str:
         """
-        RAW PROMPT MODE - No chat template. Pure causal JSON generation.
+        CHAT TEMPLATE MODE - Matches Qwen training. Clean JSON only.
         """
         prompt_data = json.loads(prompt)
 
-        # ULTRA-STRICT PROMPT - No conversation, no thinking, JSON ONLY
-        strict_prompt = f"""Return ONLY valid JSON object. No explanation. No markdown. No text.
+        # ULTRA-CLEAN SYSTEM PROMPT - No example (reduces formatting)
+        system_prompt = (
+            "You are a robot motion planner. "
+            "Output ONLY valid JSON: {\"force_n\": float, \"velocity_mps\": float, \"distance_m\": float}. "
+            "No text. No markdown. No explanation."
+        )
 
-{{"force_n": ?, "velocity_mps": ?, "distance_m": ?}}
+        # DIRECT USER PROMPT - No "Input:" framing
+        user_prompt = json.dumps(prompt_data)
 
-Input: {json.dumps(prompt_data)}
-JSON:"""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
 
-        inputs = self.tokenizer(
-            strict_prompt,
-            return_tensors="pt",
-            padding=True,
-            truncation=True
-        ).to(self.model.device)
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+
+        inputs = self.tokenizer(text, return_tensors="pt").to(self.model.device)
 
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
-                max_new_tokens=64,  # <- Tighter limit
+                max_new_tokens=64,
                 do_sample=False,
                 temperature=0.0,
                 pad_token_id=self.tokenizer.eos_token_id,
-                repetition_penalty=1.1,  # <- Prevent loops
+                # NO repetition_penalty - conflicts with deterministic mode
             )
 
         completion = self.tokenizer.decode(
             outputs[0][len(inputs["input_ids"][0]):],
-            skip_special_tokens=True
+            skip_special_tokens=True,
         ).strip()
 
-        # Clean any trailing junk but preserve JSON
-        if completion.startswith("```"):
-            completion = completion.split("```")[1].strip()
-        if "```" in completion:
-            completion = completion.split("```")[0].strip()
+        # Clean any lingering markdown (chat models sometimes add)
+        completion = completion.replace("```json", "").replace("```", "").strip()
+        completion = completion.replace("```", "").strip()
 
-        print(f"RAW PLANNER OUTPUT: '{completion}'")  # <- DEBUG: Remove after testing
+        print(f"🔍 RAW PLANNER OUTPUT: '{completion}'")  # DEBUG - REMOVE AFTER SUCCESS
         
         return completion
 
