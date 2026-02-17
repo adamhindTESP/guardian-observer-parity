@@ -1,87 +1,81 @@
-```markdown
 # Guardian–Observer Parity
 
-**Deterministic Evaluation Artifact — Paper 2**
-
-**Repository:** guardian-observer-parity  
+**Deterministic Evaluation Artifact — Paper 2**  
+**Repository:** `guardian-observer-parity`  
 **Status:** Frozen deterministic evaluation harness (publication artifact)  
-**Purpose:** Empirical validation of the Observer–Guardian Non-Interference Invariant
+**Purpose:** Empirical validation of the **Observer–Guardian Non-Interference Invariant**
 
----
+***
 
-## 📌 Paper Claim
+## 📄 Paper Claim
 
 This repository validates the following invariant:
 
-**Enabling the Observer layer (Temple) produces no change in execution decisions, evaluation stream contents, or evaluation stream hash.**
+> **Enabling the Observer layer ("Temple") produces no change in execution decisions, evaluation stream contents, or evaluation stream hash.**
 
-Temple is strictly:
-- Write-only
+### Temple Characteristics
+- Write-only  
 - Authority-free  
-- Invisible to Planner and Guardian
-- Non-branching with respect to runtime control flow
+- Invisible to Planner and Guardian  
+- Non-branching with respect to runtime control flow  
 
-**If Temple ON and Temple OFF produce identical evaluation stream hashes, non-interference is empirically demonstrated.**
+When Temple ON and Temple OFF produce identical stream hashes, runtime non-interference is empirically demonstrated.
 
----
+***
 
-## What This Repository Contains
-- Deterministic evaluation runner (`run_eval_minimal.py` **v4.9.1**)
-- Frozen Semantic Guardian Kernel (SGK)
-- Planner wrappers (proposal-only)
-- Minimal Observer implementation 
-- Canonical test sets
-- Full stream SHA-256 verification
+## 📦 Repository Contents
 
-**This repository is:**
-- Fully reproducible
-- Deterministic (SEED=42 locked)
-- Planner-agnostic
-- Enforcement-preserving
+- Deterministic evaluation runner (`run_eval_minimal.py` v4.9.2)  
+- Frozen **Semantic Guardian Kernel (SGK)**  
+- Planner wrappers (proposal-only)  
+- Minimal write-only **Observer** implementation  
+- Canonical test sets  
+- Full evaluation-stream SHA-256 verification  
 
----
+**Properties**
+- Fully reproducible within a fixed environment  
+- Seed-locked (**SEED = 42**)  
+- Planner-agnostic  
+- Enforcement-preserving  
+- Observer-non-interfering by design  
 
-## What This Repository Is Not
-- Not a training repository
-- Not a robotics stack
-- Not a deployment framework
-- Not an alignment system
+***
 
-**This repository exists solely to validate the Observer–Guardian non-interference invariant.**
+## 🚫 Out of Scope
 
----
+- Training, robotics, or deployment stacks  
+- Alignment or isolation systems  
+- Hardware-level determinism or proof of cross-device parity  
 
-## Architectural Scope
+This artifact solely validates the **Observer–Guardian non-interference invariant**.
+
+***
+
+## 🧭 Architectural Scope
 
 ```
-Runtime pipeline under test:
-
 Planner (proposal-only)
-         ↓
+     ↓
 SGK (deterministic veto authority)
-         ↓  
+     ↓
 Observer (write-only, no feedback)
 ```
 
-**Critical invariant:**
-- Observer cannot modify execution
-- Observer cannot veto
-- Observer cannot branch execution
-- Observer cannot affect SGK state
-- Observer cannot affect planner prompt or output
+**Critical invariant**
+- Observer cannot modify, veto, or branch execution  
+- Observer cannot affect SGK state  
+- Observer cannot affect planner prompt or output  
 
----
+***
 
-## Reproducibility Modes
+## 🧪 Reproducibility Modes
 
-Two reproduction paths supported.
+Two deterministic reproduction paths are supported, both using the **guardian enforcement dataset** (`test_sets/gte_core_guardian.jsonl`) to ensure VETO visibility.
 
 ### Mode A — Guardian-Only (Core Proof)
-Sufficient to validate the invariant.
-- No model download
-- No GPU required
-- Runs on any laptop
-- Fully validates hash parity
+
+Minimal proof of invariant.  
+No model download -  No GPU required -  Runs on any machine.
 
 #### 1️⃣ Temple OFF
 ```bash
@@ -95,14 +89,18 @@ python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
     --temple-out observer/gte_core_guardian_temple.json
 ```
 
-**Expected:** Identical PASS/VETO counts + **identical Stream Hash**
+**Expected**
+- Identical PASS/VETO counts  
+- Identical stream hash  
 
----
+Confirms Temple has no influence on deterministic Guardian enforcement.
 
-### Mode B — Planner-Enabled (Extended Validation)
-Validates invariant under live planner execution.
+***
 
-**Paper 2 Model:** `Qwen/Qwen2.5-7B-Instruct` (~16GB RAM, GPU recommended)
+### Mode B — Planner Enabled + Guardian Enforcement (Extended Proof)
+
+Validates Observer non-interference under live planner proposals **evaluated by Guardian** on the enforcement dataset.  
+**Paper 2 Model:** `Qwen/Qwen2.5-7B-Instruct`
 
 #### 3️⃣ Planner Enabled — Temple OFF
 ```bash
@@ -127,117 +125,126 @@ python run_eval_minimal.py test_sets/gte_core_guardian.jsonl \
     --run-id qwen_core_guardian_temple_on
 ```
 
-**Expected:** Identical PASS/VETO counts, planner calls, proposal hashes, **Stream Hash**
+**Expected**
+- Identical PASS/VETO counts  
+- Identical planner call counts  
+- Identical proposal hashes  
+- Identical stream hash  
 
----
+Demonstrates Observer does not influence planner proposals, Guardian enforcement, or execution stream on the red-team enforcement set.
 
-## Deterministic Execution
+***
 
-The evaluation runner **v4.9.1** enforces:
+## ⚙️ Deterministic Execution Model
+
+**Runner version:** v4.9.2  
+**Seed:** 42  
 
 ```python
-SEED = 42
 random.seed(SEED)
-np.random.seed(SEED) 
+np.random.seed(SEED)
 torch.manual_seed(SEED)
-torch.cuda.manual_seed_all(SEED)  # if CUDA available
-torch.use_deterministic_algorithms(True)
+torch.cuda.manual_seed_all(SEED)
+
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+
+# Planner generation:
+# do_sample = False
+# temperature = 0.0
 ```
 
-**Stream hash computed from:**
-- Test ID
+Strict `torch.use_deterministic_algorithms(True)` is **not** enforced (may fail under certain CUDA/cuBLAS configs).  
+
+**Proven:** Temple ON/OFF equivalence within a single execution environment.  
+**Not claimed:** Cross-hardware bit-level equality.
+
+***
+
+## 🔑 Stream Hash Definition
+
+Computed from:
+- Test ID  
 - Guardian verdict  
-- Force / velocity / distance values
-- Proposal hash (planner enabled)
+- Force/Velocity/Distance values  
+- Proposal hash (planner-enabled mode)  
 
-**Observer output excluded from hash.**
+**Observer output excluded** — Temple cannot influence the verified stream.
 
-### 🖥️ Software Stack
-```
-Python 3.10.12
-PyTorch 2.1.0 (deterministic algorithms enabled)
-CUDA 12.2
-torch.backends.cudnn.deterministic = True
-```
+***
 
-**Bit-level parity guaranteed only within identical software/hardware environments.**
-
-**Cross-hardware hash equality not claimed; Temple ON/OFF parity holds within same execution environment.**
-
----
-
-## 📊 Expected Output Format
-
-```
+## 📊 Example Output
+```text
 EVAL SUMMARY
 ---------------------------------------------------
-Total tests        : 50
-PASS               : 34  
-VETO               : 16
-Planner calls      : 50
+Total tests        : 8
+PASS               : 8
+VETO               : 0
+Planner calls      : 0
 ---------------------------------------------------
-Avg force (N)      : 0.8421
-Avg velocity (m/s) : 0.0231
+Avg force (N)      : 0.0000
+Avg velocity (m/s) : 0.0000
 Avg distance (m)   : 0.3000
 ===================================================
 DETERMINISTIC MODE (Seed Locked)
 Seed               : 42
-Stream Hash        : f9ebc72a0843234930e30829be4e1bea047dac9a060cb612ee520f7005a99289
+Stream Hash        : 022b32bb7bbb1ad6f4369f83682054a5797c10b7fdb6fb5f82c8ebd24e06fc1
 ===================================================
 ```
 
-**Hash must match exactly between Temple OFF and Temple ON.**
+Temple ON and OFF must produce **identical** stream hash values.
 
-**Parity evaluated within same execution environment. Invariant concerns ON/OFF equivalence.**
+***
 
----
+## 📁 Result Artifacts
 
-## 📁 Results Artifacts
-```
-results/<run_id>.results.jsonl     # Full evaluation records
-results/<run_id>.summary.json      # Summary + hash
-observer/*.json                    # Temple logs (ON only)
-```
+- `results/<run_id>.results.jsonl`  
+- `results/<run_id>.summary.json`  
+- `observer/*.json`
 
----
+***
 
-## Threat Model (Paper 2 Scope)
-**Validates:**
-- Runtime non-interference
+## 🧱 Threat Model (Paper 2 Scope)
+
+**Validated**
+- Runtime non-interference  
 - Authority separation integrity  
-- Deterministic execution stability
-- Write-only observer behavior
+- Seed-locked stability  
+- Write-only Observer behavior  
 
-**Out of scope:**
-- Hardware attacks
-- OS compromise
-- Microarchitectural side channels
-- Alignment guarantees
-- Long-horizon planning exploits
+**Out of scope**
+- Hardware/OS attacks  
+- Microarchitectural side channels  
+- Alignment guarantees  
+- Cross-hardware reproducibility  
 
----
+***
 
-## Relationship to Paper 1
-**Paper 1 (Guardian-01):** Safety enforcement independent of planner learning  
-**Paper 2:** Observation independent of enforcement authority
+## 🔗 Relationship to Paper 1
 
-**Together:** Intelligence ≠ Authority, Observation ≠ Influence
+**Paper 1 (Guardian-01):** Safety enforcement independent of planner learning.  
+**Paper 2:** Observation independent of enforcement authority.
 
----
+> **Intelligence ≠ Authority**  **Observation ≠ Influence**
 
-## Version History
+***
 
-**Publication tag:** `observer-parity-v1.1.0`
+## 🧾 Version History
 
-**This tag reflects the deterministic seeded artifact (SEED=42, PyTorch deterministic algorithms enabled) referenced in Paper 2.**
+**Publication Tag:** `observer-parity-v1.1.1`
 
-*Previous release (`observer-parity-v1.0.0`) did not explicitly enforce global seed locking. v1.1.0 strengthens reproducibility guarantees.*
+**v1.1.1 includes**
+- Runner v4.9.2  
+- Robust planner JSON extraction  
+- Seed-locked deterministic generation  
+- Guardian-only & Planner+Guardian parity (same enforcement dataset)  
+- Clarified determinism scope  
 
----
+**Previous:** v1.0.0 (initial), v1.1.0 (determinism added)
 
-## License
-MIT License  
-Copyright (c) 2026
-```
+***
+
+## ⚖️ License
+
+**MIT License**  
+Copyright (c) 2026  
