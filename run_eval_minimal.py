@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-run_eval_minimal.py — Guardian Evaluation Runner v4.9.0
-Deterministic + Reproducible + Full Stream Hash
+run_eval_minimal.py — Guardian Evaluation Runner v4.9.1
+Deterministic + Reproducible + Full Stream Hash + Summary
 """
 
 from __future__ import annotations
@@ -116,11 +116,14 @@ class GuardianEvaluator:
             )
 
     def _planner_prompt(self, instruction: str, context: Dict[str, Any]) -> str:
-        return json.dumps({
-            "instruction": instruction,
-            "context": context,
-            "constraints": self.constraints.dict(),
-        }, ensure_ascii=False)
+        return json.dumps(
+            {
+                "instruction": instruction,
+                "context": context,
+                "constraints": self.constraints.dict(),
+            },
+            ensure_ascii=False,
+        )
 
     def _default_output(self) -> Dict[str, Any]:
         return {
@@ -194,11 +197,13 @@ class GuardianEvaluator:
 
         self.records.append(rec)
 
-        self.temple.log_event({
-            "test_id": test_id,
-            "verdict": verdict,
-            "proposal_hash8": proposal_hash8,
-        })
+        self.temple.log_event(
+            {
+                "test_id": test_id,
+                "verdict": verdict,
+                "proposal_hash8": proposal_hash8,
+            }
+        )
 
     def run(self, test_path: Path) -> None:
         raw = test_path.read_text(encoding="utf-8").strip()
@@ -212,7 +217,7 @@ class GuardianEvaluator:
     def stream_hash(self) -> str:
         payload = json.dumps(
             [asdict(r) for r in self.records],
-            sort_keys=True
+            sort_keys=True,
         ).encode("utf-8")
 
         return hashlib.sha256(payload).hexdigest()
@@ -221,7 +226,9 @@ class GuardianEvaluator:
 # ============================================================
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Guardian Evaluation Runner v4.9.1 (Deterministic Stream Hash + Summary)"
+    )
     parser.add_argument("test_file")
     parser.add_argument("--guardian-only", action="store_true")
     parser.add_argument("--planner", action="store_true")
@@ -258,9 +265,35 @@ def main() -> None:
 
     stream_hash = evaluator.stream_hash()
 
+    # ------------------------------------------------------------
+    # Human-Readable Summary (Does NOT affect hash)
+    # ------------------------------------------------------------
+    total = len(evaluator.records)
+    pass_count = sum(1 for r in evaluator.records if r.verdict == "PASS")
+    veto_count = sum(1 for r in evaluator.records if r.verdict == "VETO")
+
     print("\n===================================================")
-    print("EVAL COMPLETE — DETERMINISTIC MODE")
-    print(f"Hash: {stream_hash}")
+    print("EVAL SUMMARY")
+    print("---------------------------------------------------")
+    print(f"Total tests        : {total}")
+    print(f"PASS               : {pass_count}")
+    print(f"VETO               : {veto_count}")
+    print(f"Planner calls      : {evaluator.planner_calls}")
+
+    if total > 0:
+        avg_force = sum(r.force_n for r in evaluator.records) / total
+        avg_velocity = sum(r.velocity_mps for r in evaluator.records) / total
+        avg_distance = sum(r.distance_m for r in evaluator.records) / total
+
+        print("---------------------------------------------------")
+        print(f"Avg force (N)      : {avg_force:.4f}")
+        print(f"Avg velocity (m/s) : {avg_velocity:.4f}")
+        print(f"Avg distance (m)   : {avg_distance:.4f}")
+
+    print("===================================================")
+    print("DETERMINISTIC MODE (Seed Locked)")
+    print(f"Seed               : {SEED}")
+    print(f"Stream Hash        : {stream_hash}")
     print("===================================================")
 
     out_dir = Path(args.out_dir)
@@ -268,16 +301,25 @@ def main() -> None:
 
     run_id = args.run_id or "run"
 
-    with open(out_dir / f"{run_id}.results.jsonl", "w") as f:
+    with open(out_dir / f"{run_id}.results.jsonl", "w", encoding="utf-8") as f:
         for r in evaluator.records:
             f.write(json.dumps(asdict(r), sort_keys=True) + "\n")
 
-    with open(out_dir / f"{run_id}.summary.json", "w") as f:
-        json.dump({
-            "stream_hash": stream_hash,
-            "seed": SEED,
-            "constraints": constraints,
-        }, f, indent=2, sort_keys=True)
+    with open(out_dir / f"{run_id}.summary.json", "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "stream_hash": stream_hash,
+                "seed": SEED,
+                "constraints": constraints,
+                "total_tests": total,
+                "pass": pass_count,
+                "veto": veto_count,
+                "planner_calls": evaluator.planner_calls,
+            },
+            f,
+            indent=2,
+            sort_keys=True,
+        )
 
     if temple.enabled:
         temple.flush()
